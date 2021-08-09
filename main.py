@@ -221,7 +221,7 @@ def get_operation():
 
 @app.route('/getMatchedImage', methods=['POST'])
 def get_match_image():
-  content = request.get_json()
+  content = json.loads(request.data)
   error_or_none = check_key_in_json(content, ['name', 'key', 'endpoint'])
   if error_or_none:
     return error_or_none
