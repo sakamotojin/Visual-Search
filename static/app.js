@@ -1036,3 +1036,4 @@ $('.div-radio').click(function(e) {
   $(e.target).find('input').click();
 });
 })();
+
