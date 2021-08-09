@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 import os
+import traceback
 
 from flask import Flask, render_template, request, send_from_directory
 from google.auth.transport.requests import AuthorizedSession
@@ -99,12 +100,10 @@ def parse_product_search_request(req):
   product_search_request_json = {
       'requests': [{
           'image': {
-              'content': b64encode(content).decode('ascii'),
+              'content': b64encode(content).decode('ascii')
           },
           'features': [{
-              'type': 'PRODUCT_SEARCH',
-              'max_results': max_results,
-              'model': model_version,
+              'type': 'PRODUCT_SEARCH'
           }],
           'image_context': {
               'product_search_params': {
@@ -130,10 +129,16 @@ def product_search():
         json_key)
     scoped_credentials = credentials.with_scopes(_DEFAULT_SCOPES)
     authed_session = AuthorizedSession(scoped_credentials)
-    url = os.path.join(endpoint, 'images:annotate')
+    url = 'https://vision.googleapis.com/v1/images:annotate'
     response = authed_session.post(
         url=url, data=json.dumps(product_search_request_json)).json()
+    print(response, url)
+    #print(json.dumps(product_search_request_json))
   except Exception as e:
+    #print(json.dumps(product_search_request_json).json())
+    print("Error In API" , str(e))
+
+    traceback.print_exc()
     return _Error('Internal error: ' + str(e))
   return json.dumps({
       'success': True,
@@ -226,7 +231,8 @@ def get_match_image():
   if not endpoint.startswith('https://'):
     return _Error('Invalid api endpoint')
   product_id = image_full_name.split('/')[5]
-  url = os.path.join(endpoint, image_full_name)
+  url = endpoint + '/' + image_full_name
+  print(url)
 
   (json_key, success) = validate_json_key(content['key'])
   if not success:
